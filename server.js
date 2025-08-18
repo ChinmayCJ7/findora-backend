@@ -8,10 +8,10 @@ import { errorMiddleware } from "./middlewares/errorMiddleware.js";
 
 const app = express();
 
-// ✅ CORS (Allow frontend origin from .env)
+// ✅ CORS
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || "*",
+    origin: process.env.CLIENT_ORIGIN || "*", // frontend URL
     credentials: true,
   })
 );
@@ -34,5 +34,7 @@ app.use(errorMiddleware);
 // ✅ Start Server
 const PORT = process.env.PORT || 5000;
 connectDB().then(() => {
-  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  app.listen(PORT, () =>
+    console.log(`🚀 Server running on port ${PORT}`)
+  );
 });

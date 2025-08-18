@@ -1,4 +1,4 @@
-import { Router } from "express";
+import express from "express";
 import {
   getItems,
   addItem,
@@ -6,7 +6,7 @@ import {
   deleteItem,
 } from "../controllers/itemController.js";
 
-const router = Router();
+const router = express.Router();
 
 router.get("/", getItems);
 router.post("/", addItem);

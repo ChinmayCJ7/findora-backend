@@ -1,41 +1,47 @@
-import { Item } from "../models/Item.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
+import Item from "../models/itemModel.js";
 
-// GET /api/items
-export const getItems = asyncHandler(async (req, res) => {
-  const items = await Item.find().sort({ createdAt: -1 });
+// @desc   Get all items
+// @route  GET /api/items
+export const getItems = async (req, res) => {
+  const items = await Item.find();
   res.json(items);
-});
+};
 
-// POST /api/items
-export const addItem = asyncHandler(async (req, res) => {
-  const { name, location, notes, photoUrl } = req.body;
-  if (!name || !location) {
-    return res.status(400).json({ error: "name and location are required" });
+// @desc   Add new item
+// @route  POST /api/items
+export const addItem = async (req, res) => {
+  const { name, description } = req.body;
+
+  if (!name) {
+    return res.status(400).json({ message: "Name is required" });
   }
-  const created = await Item.create({ name, location, notes, photoUrl });
-  res.status(201).json(created);
-});
 
-// PUT /api/items/:id
-export const updateItem = asyncHandler(async (req, res) => {
+  const item = await Item.create({ name, description });
+  res.status(201).json(item);
+};
+
+// @desc   Update item
+// @route  PUT /api/items/:id
+export const updateItem = async (req, res) => {
   const { id } = req.params;
-  const { name, location, notes, photoUrl } = req.body;
+  const updatedItem = await Item.findByIdAndUpdate(id, req.body, { new: true });
 
-  const updated = await Item.findByIdAndUpdate(
-    id,
-    { name, location, notes, photoUrl },
-    { new: true, runValidators: true }
-  );
+  if (!updatedItem) {
+    return res.status(404).json({ message: "Item not found" });
+  }
 
-  if (!updated) return res.status(404).json({ error: "Item not found" });
-  res.json(updated);
-});
+  res.json(updatedItem);
+};
 
-// DELETE /api/items/:id
-export const deleteItem = asyncHandler(async (req, res) => {
+// @desc   Delete item
+// @route  DELETE /api/items/:id
+export const deleteItem = async (req, res) => {
   const { id } = req.params;
-  const deleted = await Item.findByIdAndDelete(id);
-  if (!deleted) return res.status(404).json({ error: "Item not found" });
+  const deletedItem = await Item.findByIdAndDelete(id);
+
+  if (!deletedItem) {
+    return res.status(404).json({ message: "Item not found" });
+  }
+
   res.json({ message: "Item deleted successfully" });
-});
+};
