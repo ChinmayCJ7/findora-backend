@@ -9,7 +9,7 @@ const app = express();
 
 // ✅ CORS setup
 const allowedOrigins = [
-  "http://localhost:5173",         // local frontend
+        // local frontend
   "https://findora-wine.vercel.app" // deployed frontend
 ];
 
