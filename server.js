@@ -1,35 +1,38 @@
+import "dotenv/config";
 import express from "express";
-import mongoose from "mongoose";
 import cors from "cors";
+import { connectDB } from "./config/db.js";
+import itemRoutes from "./routes/itemRoutes.js";
+import { notFound } from "./middlewares/notFound.js";
+import { errorMiddleware } from "./middlewares/errorMiddleware.js";
 
 const app = express();
-app.use(cors());
+
+// CORS for your React dev server
+app.use(
+  cors({
+    origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
+    credentials: true,
+  })
+);
+
+// Parse JSON
 app.use(express.json());
 
-// MongoDB connection (replace with your Atlas connection string)
-mongoose.connect("mongodb+srv://chinnu:chinnu12@mycluster.uxvwz.mongodb.net/?retryWrites=true&w=majority&appName=MyCluster", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+// Healthcheck
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", uptime: process.uptime() });
 });
-
-const ItemSchema = new mongoose.Schema({
-  name: String,
-  place: String,
-});
-
-const Item = mongoose.model("Item", ItemSchema);
 
 // Routes
-app.get("/items", async (req, res) => {
-  const items = await Item.find();
-  res.json(items);
-});
+app.use("/api/items", itemRoutes);
 
-app.post("/items", async (req, res) => {
-  const { name, place } = req.body;
-  const newItem = new Item({ name, place });
-  await newItem.save();
-  res.json(newItem);
-});
+// 404 + Error handlers
+app.use(notFound);
+app.use(errorMiddleware);
 
-app.listen(5000, () => console.log("✅ Backend running on port 5000"));
+// Start
+const PORT = process.env.PORT || 5000;
+connectDB().then(() => {
+  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+});
