@@ -11,10 +11,14 @@ const app = express();
 // ✅ CORS
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || "*", // frontend URL
+    origin: [
+      "http://localhost:5173", // for local dev
+      "https://findora-wine.vercel.app", // ✅ your Vercel frontend
+    ],
     credentials: true,
   })
 );
+
 
 // ✅ Body Parser
 app.use(express.json());
