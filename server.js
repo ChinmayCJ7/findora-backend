@@ -1,44 +1,46 @@
-import "dotenv/config";
 import express from "express";
+import mongoose from "mongoose";
 import cors from "cors";
-import { connectDB } from "./config/db.js";
-import itemRoutes from "./routes/itemRoutes.js";
-import { notFound } from "./middlewares/notFound.js";
-import { errorMiddleware } from "./middlewares/errorMiddleware.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 
-// ✅ CORS
+// ✅ CORS setup
+const allowedOrigins = [
+  "http://localhost:5173",         // local frontend
+  "https://findora-wine.vercel.app" // deployed frontend
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173", // for local dev
-      "https://findora-wine.vercel.app", // ✅ your Vercel frontend
-    ],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
 
-
-// ✅ Body Parser
+// Middleware
 app.use(express.json());
 
-// ✅ Healthcheck Route
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", uptime: process.uptime() });
-});
+// ✅ Sample MongoDB connection (update your DB URL in .env)
+mongoose
+  .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// ✅ API Routes
+// ✅ Routes
+import itemRoutes from "./routes/itemRoutes.js";
 app.use("/api/items", itemRoutes);
 
-// ✅ Error Handlers
-app.use(notFound);
-app.use(errorMiddleware);
-
-// ✅ Start Server
+// Start server
 const PORT = process.env.PORT || 5000;
-connectDB().then(() => {
-  app.listen(PORT, () =>
-    console.log(`🚀 Server running on port ${PORT}`)
-  );
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
