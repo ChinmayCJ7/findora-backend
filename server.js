@@ -8,30 +8,30 @@ import { errorMiddleware } from "./middlewares/errorMiddleware.js";
 
 const app = express();
 
-// CORS for your React dev server
+// ✅ CORS (Allow frontend origin from .env)
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
+    origin: process.env.CLIENT_ORIGIN || "*",
     credentials: true,
   })
 );
 
-// Parse JSON
+// ✅ Body Parser
 app.use(express.json());
 
-// Healthcheck
+// ✅ Healthcheck Route
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", uptime: process.uptime() });
 });
 
-// Routes
+// ✅ API Routes
 app.use("/api/items", itemRoutes);
 
-// 404 + Error handlers
+// ✅ Error Handlers
 app.use(notFound);
 app.use(errorMiddleware);
 
-// Start
+// ✅ Start Server
 const PORT = process.env.PORT || 5000;
 connectDB().then(() => {
   app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
